@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p sd_card
+
 if [ ! -f linux-xlnx/.config ]; then
    cp -i config/linux-zynq-config linux-xlnx/.config
 fi

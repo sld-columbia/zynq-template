@@ -1,5 +1,6 @@
 #!/bin/bash
 
+mkdir -p sd_card
 mkdir -p initramfs
 cd initramfs
 
