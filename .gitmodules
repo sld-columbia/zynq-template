@@ -1,0 +1,3 @@
+[submodule "linux-xlnx"]
+	path = linux-xlnx
+	url = https://github.com/Xilinx/linux-xlnx.git
