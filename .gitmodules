@@ -4,3 +4,6 @@
 [submodule "u-boot-xlnx"]
 	path = u-boot-xlnx
 	url = https://github.com/Xilinx/u-boot-xlnx.git
+[submodule "device-tree-xlnx"]
+	path = device-tree-xlnx
+	url = https://github.com/Xilinx/device-tree-xlnx.git
