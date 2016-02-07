@@ -1,29 +1,30 @@
 #!/bin/bash
 
-source ./build_common.sh
+CURR_DIR=${PWD}
+
+source $CURR_DIR/scripts/build_common.sh
 
 export BOARD=$board
 
-mkdir -p vivado
-cd vivado
+if [ ! -f $CURR_DIR/vivado/$board/$board.sdk/system_wrapper.hdf ]; then
+    echo "Error: desing not found or not exported to SDK. Run "make system" first!"
+    exit
+fi
 
-#Generate system and create bitstream. Add customizations to vivado.tcl
-echo "=== Generating IPs and bitstream for ZYNQ $board ==="
-
-vivado -mode batch -source ../vivado_tcl/vivado.tcl | tee vivado_$board.log
-cp $board/$board.sdk/system_wrapper.bit ../$SD_CARD
+cd $CURR_DIR/vivado
 
 # Generate the device tree and the bootloader based on the system configuration
 echo "=== Building device tree and boot loader for ZYNQ $board ==="
 
-hsi -mode batch -source ../vivado_tcl/hsi.tcl | tee hsi_$board.log
+hsi -mode batch -source $CURR_DIR/scripts/vivado_tcl/hsi.tcl | tee hsi_$board.log
 dtc -I dts -O dtb -o $board\_dtb/system.dtb $board\_dtb/system.dts
-cp $board\_dtb/system.dtb ../$SD_CARD/devicetree.dtb
-cp $board\_fsbl/executable.elf ../$SD_CARD/fsbl.elf
+cp $board\_dtb/system.dtb $CURR_DIR/$SD_CARD/devicetree.dtb
+cp $board\_fsbl/executable.elf $CURR_DIR/$SD_CARD/fsbl.elf
+cp $board/$board.sdk/system_wrapper.bit $CURR_DIR/$SD_CARD
 
-cd ..
+cd $CURR_DIR
 
-cd $SD_CARD
+cd $CURR_DIR/$SD_CARD
 
 echo "=== Generate bootstrap for ZYNQ $board ==="
 
@@ -38,4 +39,4 @@ echo "}" >> boot.bif
 # Generate bootstrap
 bootgen -image boot.bif -o BOOT.bin
 
-cd ..
+cd $CURR_DIR

@@ -16,7 +16,13 @@ linux:
 u-boot:
 	@./scripts/build_uboot.sh $(BOARD)
 
-.PHONY: clean distclean sysroot linux u-boot
+system:
+	@./scripts/build_system.sh $(BOARD)
+
+bootstrap:
+	@./scripts/build_bootstrap.sh $(BOARD)
+
+.PHONY: clean distclean sysroot linux u-boot system bootstrap
 
 
 initramfs:
