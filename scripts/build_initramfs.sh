@@ -1,6 +1,8 @@
 #!/bin/bash
 
-source ./build_common.sh
+CURR_DIR=${PWD}
+
+source $CURR_DIR/scripts/build_common.sh
 
 echo "=== Building root file system for ZYNQ $board ==="
 
@@ -15,8 +17,8 @@ if [ ! -d mnt ]; then
 fi
 
 # Create a cpio initramfs with gzip compression and pack it for Zynq
-sh -c 'cd mnt/ && find . | cpio -H newc -o' | gzip -9 > initramfs.cpio.gz
-mkimage -A arm -T ramdisk -C gzip -d initramfs.cpio.gz uramdisk.image.gz
-cp uramdisk.image.gz ../$SD_CARD
+sh -c 'cd mnt/ && find . | cpio -H newc -o' | gzip -9 > $CURR_DIR/$SD_CARD/initramfs.cpio.gz
+mkimage -A arm -T ramdisk -C gzip -d $CURR_DIR/$SD_CARD/initramfs.cpio.gz $CURR_DIR/$SD_CARD/uramdisk.image.gz
+rm $CURR_DIR/$SD_CARD/initramfs.cpio.gz
 
 cd ..
