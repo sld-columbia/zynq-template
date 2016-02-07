@@ -13,7 +13,10 @@ sysroot:
 linux:
 	@./scripts/build_linux.sh $(BOARD)
 
-.PHONY: clean distclean sysroot linux
+u-boot:
+	@./scripts/build_uboot.sh $(BOARD)
+
+.PHONY: clean distclean sysroot linux u-boot
 
 
 initramfs:
