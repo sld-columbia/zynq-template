@@ -1,6 +1,9 @@
 #!/bin/bash
 
-mkdir -p sd_card
+source ./build_common.sh
+
+echo "=== Building root file system for ZYNQ $board ==="
+
 mkdir -p initramfs
 cd initramfs
 
@@ -14,6 +17,6 @@ fi
 # Create a cpio initramfs with gzip compression and pack it for Zynq
 sh -c 'cd mnt/ && find . | cpio -H newc -o' | gzip -9 > initramfs.cpio.gz
 mkimage -A arm -T ramdisk -C gzip -d initramfs.cpio.gz uramdisk.image.gz
-cp uramdisk.image.gz ../sd_card
+cp uramdisk.image.gz ../$SD_CARD
 
 cd ..
