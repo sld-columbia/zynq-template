@@ -2,10 +2,8 @@
 BOARD ?= zc702
 #BOARD ?= zc706
 
-clean:
+all: sysroot linux u-boot system bootstrap
 
-distclean: clean
-	rm -rf initramfs sd_card_* vivado
 
 sysroot:
 	BOARD=$(BOARD) $(MAKE) initramfs && BOARD=$(BOARD) $(MAKE) sd_card_$(BOARD)/uramdisk.image.gz
@@ -22,7 +20,7 @@ system:
 bootstrap:
 	@./scripts/build_bootstrap.sh $(BOARD)
 
-.PHONY: clean distclean sysroot linux u-boot system bootstrap
+.PHONY: sysroot linux u-boot system bootstrap
 
 
 initramfs:
@@ -31,3 +29,12 @@ initramfs:
 sd_card_$(BOARD)/uramdisk.image.gz: $(shell find initramfs 2>/dev/null)
 	@./scripts/build_initramfs.sh $(BOARD)
 
+
+clean:
+
+distclean: clean
+	rm -rf initramfs sd_card_* vivado
+	@make -C linux-xlnx mrproper distclean
+	@make -C u-boot-xlnx mrproper distclean
+
+.PHONY: clean distclean
