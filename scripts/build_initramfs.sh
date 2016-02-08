@@ -20,5 +20,6 @@ fi
 sh -c 'cd mnt/ && find . | cpio -H newc -o' | gzip -9 > $CURR_DIR/$SD_CARD/initramfs.cpio.gz
 mkimage -A arm -T ramdisk -C gzip -d $CURR_DIR/$SD_CARD/initramfs.cpio.gz $CURR_DIR/$SD_CARD/uramdisk.image.gz
 rm $CURR_DIR/$SD_CARD/initramfs.cpio.gz
+cp $CURR_DIR/config/mac_$board $CURR_DIR/$SD_CARD/mac_address
 
 cd ..
