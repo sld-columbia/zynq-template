@@ -32,8 +32,8 @@ echo "=== Generate bootstrap for ZYNQ $board ==="
 echo "the_ROM_image:" > boot.bif
 echo "{" >> boot.bif
 echo "	[bootloader]fsbl.elf" >> boot.bif
-echo "	u-boot.elf" >> boot.bif
 echo "	system_wrapper.bit" >> boot.bif
+echo "	u-boot.elf" >> boot.bif
 echo "}" >> boot.bif
 
 # Generate bootstrap
