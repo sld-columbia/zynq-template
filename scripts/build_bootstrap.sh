@@ -37,6 +37,6 @@ echo "	u-boot.elf" >> boot.bif
 echo "}" >> boot.bif
 
 # Generate bootstrap
-bootgen -image boot.bif -o BOOT.bin
+bootgen -image boot.bif -w -o BOOT.bin
 
 cd $CURR_DIR
