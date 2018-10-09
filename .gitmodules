@@ -7,3 +7,6 @@
 [submodule "device-tree-xlnx"]
 	path = device-tree-xlnx
 	url = https://github.com/Xilinx/device-tree-xlnx.git
+[submodule "arm-trusted-firmware"]
+	path = arm-trusted-firmware
+	url = https://github.com/Xilinx/arm-trusted-firmware.git
