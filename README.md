@@ -14,6 +14,12 @@ add more features.
 
 Scripts are tested with Vivado 2018.2.
 
+Please clone with the `--recursive` option to fetch Xilinx source files for Linux, U-boot, device tree and ARM trusted firmware.
+
+```
+$ git clone --recursive git@dev.sld.cs.columbia.edu:fpga/zynq-common.git
+```
+
 ## Supported Development Boards
 
   - Zynq ZC702 and ZC706
