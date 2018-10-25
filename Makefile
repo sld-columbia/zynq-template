@@ -6,6 +6,8 @@ BOARD ?= zc702
 #BOARD ?= zc706
 #BOARD ?= zcu102
 
+ETHADDR ?=
+
 # Environment checks
 ifeq ("$(XILINX_VIVADO)","")
 $(error XILINX_VIVADO path not specified)
@@ -208,7 +210,11 @@ $(SD-CARD)/boot/uEnv.txt:
 	@echo "=== $(BOARD): generating uEnv.txt ==="
 	@mkdir -p $(SD-CARD)/boot
 	@echo -n "ethaddr=" > $@
-	@echo 00:0a:$$(dd if=/dev/urandom count=1 2>/dev/null | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\).*$$/\1:\2:\3:\4/') >> $@
+	@if [ "$(ETHADDR)" == "" ]; then \
+		echo 00:0a:$$(dd if=/dev/urandom count=1 2>/dev/null | md5sum | sed 's/^\(..\)\(..\)\(..\)\(..\).*$$/\1:\2:\3:\4/') >> $@; \
+	else \
+		echo "$(ETHADDR)" >> $@; \
+	fi;
 	@echo "bootargs=console=ttyPS0,115200 root=/dev/mmcblk0p2 rw rootwait earlyprintk" >> $@
 	@echo "uenvcmd=echo Copying Linux from SD to RAM... && fatload mmc 0 0x2080000 uImage && fatload mmc 0 0x2000000 devicetree.dtb && bootm 0x2080000 - 0x2000000" >> $@
 endif
