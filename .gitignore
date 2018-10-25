@@ -1,9 +1,7 @@
-initramfs
-sd_card_*
 *.swp
 *~
 *.jou
 *.log
 *.debug
 *.str
-vivado
+out

@@ -1,0 +1,28 @@
+set target [lindex $argv 0]
+set zynq_root [lindex $argv 1]
+set devtree $zynq_root/device-tree-xlnx
+
+source $zynq_root/scripts/hsi_common.tcl
+
+if { ([string compare $target "zc706"] == 0) || ([string compare $target "zc702"] == 0 )} {
+
+    # Device tree
+    create_sw_design -os device_tree -proc ps7_cortexa9_0 system_dt
+    generate_target -dir dt
+    if { ([string compare $target "zc706"] == 0)} {
+	set_property CONFIG.periph_type_overrides "{BOARD zc702}" [get_os]
+    }
+    if { ([string compare $target "zc706"] == 0)} {
+	set_property CONFIG.periph_type_overrides "{BOARD zc706}" [get_os]
+    }
+    set_property CONFIG.bootargs "console=ttyPS0,115200 earlyprintk root=/dev/mmcblk0p2 rw rootwait" [get_os]
+    generate_target -dir dt
+}
+
+if { [string compare $target "zcu102"] == 0 } {
+    # Device tree
+    create_sw_design -os device_tree -proc psu_cortexa53_0 system_dt
+    generate_target -dir dt
+    set_property CONFIG.periph_type_overrides "{BOARD zcu102-rev1.0}" [get_os]
+    generate_target -dir dt
+}
