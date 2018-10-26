@@ -1,4 +1,4 @@
-# Template design for ZYNQ and ZYNQ Ultrascale+ ZC702 and ZC706
+# Template design for ZYNQ and ZYNQ Ultrascale+
 
 This project is a collection of scripts to automate the generation of the
 necessary files to boot a minimal image of Linux on the Xilinx ZYNQ-based
