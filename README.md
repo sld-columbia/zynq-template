@@ -12,6 +12,8 @@ The root file system has been generated with the template projects from
 Petalinux. Users can replace or customize the content of `out/<BOARD>/root` to
 add more features.
 
+The default password is `SLD#xil.33`.
+
 Scripts are tested with Vivado 2018.2.
 
 Please clone with the `--recursive` option to fetch Xilinx source files for Linux, U-boot, device tree and ARM trusted firmware.
@@ -31,6 +33,13 @@ $ git clone --recursive git@github.com:sld-columbia/zynq-template.git
 ```
 $ [ETHADDR=<xx:xx:xx:xx:xx:xx>] [BOARD=<zc702|zc706|zcu102>] make
 ```
+
+If `BOARD` is not specified, make will generate the output for the ZYNQ zc702 board.
+Since both zc702 and zc706 do not have a unique MAC address,
+make will randomly assign one in the u-boot configuration file `uEnv.txt`.
+You can set a fixed MAC address by defining `ETHADDR` when you invoke make. Note that
+defining `ETHADDR` has no effect for the ZYNQ Ultrascale+ boards, which do have a unique
+MAC address stored on board.
 
 All configuration files, temporary built objects and boot images will be
 generated in `out/<BOARD>`.  This includes the files to copy onto SD
