@@ -26,3 +26,11 @@ if { [string compare $target "zcu102"] == 0 } {
     set_property CONFIG.periph_type_overrides "{BOARD zcu102-rev1.0}" [get_os]
     generate_target -dir dt
 }
+
+if { [string compare $target "zcu106"] == 0 } {
+    # Device tree
+    create_sw_design -os device_tree -proc psu_cortexa53_0 system_dt
+    generate_target -dir dt
+    set_property CONFIG.periph_type_overrides "{BOARD zcu106-revA}" [get_os]
+    generate_target -dir dt
+}

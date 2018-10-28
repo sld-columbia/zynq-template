@@ -1,10 +1,11 @@
 
 # Target Board
-board_list = zc702 zc706 zcu102
+board_list = zc702 zc706 zcu102 zcu106
 
 BOARD ?= zc702
 #BOARD ?= zc706
 #BOARD ?= zcu102
+#BOARD ?= zcu106
 
 ETHADDR ?=
 
@@ -47,11 +48,19 @@ DEVTREE=devicetree.dtb
 endif
 
 # ZYNQ MP SoC Ultrascale+
+ifneq ($(findstring zcu102, $(BOARD)),)
+REVISION=rev1_0
+endif
+
+ifneq ($(findstring zcu106, $(BOARD)),)
+REVISION=revA
+endif
+
 ifneq ($(findstring zcu, $(BOARD)),)
 ARCH=arm64
 UBOOT_ARCH=arm
 CROSS_COMPILE=aarch64-linux-gnu-
-UBOOT_DEFCONFIG=xilinx_zynqmp_$(BOARD)_rev1_0_config
+UBOOT_DEFCONFIG=xilinx_zynqmp_$(BOARD)_$(REVISION)_config
 LINUX_DEFCONFIG=xilinx_zynqmp_defconfig
 LINUX_OPT=
 LINUX_TARGET=
@@ -338,8 +347,7 @@ clean: 			\
 	clean-sdk
 
 # Clean also sd-card
-distclean: clean
-	clean-sd-card
+distclean: clean clean-sd-card
 
 # Remove entire output folder
 clean-all:

@@ -6,6 +6,8 @@ if { [string compare $target "zc706"] == 0 } {
     puts "Target Board is zc702"
 } elseif { [string compare $target "zcu102"] == 0 } {
     puts "Target Board is zcu102"
+} elseif { [string compare $target "zcu106"] == 0 } {
+    puts "Target Board is zcu106"
 } else {
     puts "Board part number is invalid!"
     exit

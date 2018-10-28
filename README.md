@@ -25,13 +25,13 @@ $ git clone --recursive git@github.com:sld-columbia/zynq-template.git
 ## Supported Development Boards
 
   - Zynq ZC702 and ZC706
-  - Zynq Ultrascale+ ZCU102
+  - Zynq Ultrascale+ ZCU102 ZCU106
 
 
 ## Usage
 
 ```
-$ [ETHADDR=<xx:xx:xx:xx:xx:xx>] [BOARD=<zc702|zc706|zcu102>] make
+$ [ETHADDR=<xx:xx:xx:xx:xx:xx>] [BOARD=<zc702|zc706|zcu102|zcu106>] make
 ```
 
 If `BOARD` is not specified, make will generate the output for the ZYNQ zc702 board.
