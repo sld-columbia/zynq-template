@@ -212,6 +212,9 @@ ifneq ($(findstring zcu, $(BOARD)),)
 $(SD-CARD)/boot/uEnv.txt:
 	@echo "=== $(BOARD): generating uEnv.txt ==="
 	@mkdir -p $(SD-CARD)/boot
+	@if [ "$(ETHADDR)" != "" ]; then \
+		echo "ethaddr=$(ETHADDR)" > $@; \
+	fi;
 	@touch $@
 else
 
