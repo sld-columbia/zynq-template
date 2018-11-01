@@ -5,7 +5,7 @@ necessary files to boot a minimal image of Linux on the Xilinx ZYNQ-based
 development boards.
 
 By editing the script for `scripts/vivado.tcl`, users can instantiate their own
-IP blocks on the programming logic. The device tree will be updated
+IP blocks on the programmable logic. The device tree will be updated
 automatically.
 
 The root file system has been generated with the template projects from
@@ -35,11 +35,9 @@ $ [ETHADDR=<xx:xx:xx:xx:xx:xx>] [BOARD=<zc702|zc706|zcu102|zcu106>] make
 ```
 
 If `BOARD` is not specified, make will generate the output for the ZYNQ zc702 board.
-Since both zc702 and zc706 do not have a unique MAC address,
-make will randomly assign one in the u-boot configuration file `uEnv.txt`.
-You can set a fixed MAC address by defining `ETHADDR` when you invoke make. Note that
-defining `ETHADDR` has no effect for the ZYNQ Ultrascale+ boards, which do have a unique
-MAC address stored on board.
+
+You can set a fixed MAC address by defining `ETHADDR` when you invoke make. If
+you do not specify the address, a randomly generated one will be used.
 
 All configuration files, temporary built objects and boot images will be
 generated in `out/<BOARD>`.  This includes the files to copy onto SD
