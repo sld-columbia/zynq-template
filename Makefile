@@ -78,6 +78,7 @@ $(UBOOT_BUILD)/.config:
 	@echo "=== $(BOARD): configuring u-boot ==="
 	@mkdir -p $(UBOOT_BUILD)
 	@KBUILD_OUTPUT=$(UBOOT_BUILD) ARCH=$(UBOOT_ARCH) CROSS_COMPILE=$(CROSS_COMPILE) $(MAKE) -C u-boot-xlnx $(UBOOT_DEFCONFIG)
+	@sed -i 's/run distro_bootcmd/run sdboot/g' $@
 
 $(UBOOT_BUILD)/u-boot: $(UBOOT_BUILD)/.config
 	@echo "=== $(BOARD): building u-boot ==="
