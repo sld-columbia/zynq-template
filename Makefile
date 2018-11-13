@@ -45,6 +45,7 @@ LINUX_TARGET=uImage
 LINUX_IMAGE=uImage
 ROOTFS_NAME=zynq
 DEVTREE=devicetree.dtb
+CMA_SIZE=256MB
 endif
 
 # ZYNQ MP SoC Ultrascale+
@@ -67,6 +68,7 @@ LINUX_TARGET=
 LINUX_IMAGE=Image
 ROOTFS_NAME=zynqmp
 DEVTREE=system.dtb
+CMA_SIZE=512MB
 endif
 
 
@@ -213,8 +215,9 @@ ifneq ($(findstring zcu, $(BOARD)),)
 $(SD-CARD)/boot/uEnv.txt:
 	@echo "=== $(BOARD): generating uEnv.txt ==="
 	@mkdir -p $(SD-CARD)/boot
+	@echo "bootargs=earlycon clk_ignore_unused root=/dev/mmcblk0p2 rw rootwait cma=$(CMA_SIZE) uio_pdrv_genirq.of_id=generic-uio" > $@
 	@if [ "$(ETHADDR)" != "" ]; then \
-		echo "ethaddr=$(ETHADDR)" > $@; \
+		echo "ethaddr=$(ETHADDR)" >> $@; \
 	fi;
 	@touch $@
 else
@@ -228,7 +231,7 @@ $(SD-CARD)/boot/uEnv.txt:
 	else \
 		echo "$(ETHADDR)" >> $@; \
 	fi;
-	@echo "bootargs=console=ttyPS0,115200 root=/dev/mmcblk0p2 rw rootwait earlyprintk" >> $@
+	@echo "bootargs=console=ttyPS0,115200 earlycon clk_ignore_unused root=/dev/mmcblk0p2 rw rootwait earlyprintk cma=$(CMA_SIZE) uio_pdrv_genirq.of_id=generic-uio" >> $@
 	@echo "uenvcmd=echo Copying Linux from SD to RAM... && fatload mmc 0 0x2080000 uImage && fatload mmc 0 0x2000000 devicetree.dtb && bootm 0x2080000 - 0x2000000" >> $@
 endif
 
