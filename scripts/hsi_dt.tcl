@@ -9,7 +9,7 @@ if { ([string compare $target "zc706"] == 0) || ([string compare $target "zc702"
     # Device tree
     create_sw_design -os device_tree -proc ps7_cortexa9_0 system_dt
     generate_target -dir dt
-    if { ([string compare $target "zc706"] == 0)} {
+    if { ([string compare $target "zc702"] == 0)} {
 	set_property CONFIG.periph_type_overrides "{BOARD zc702}" [get_os]
     }
     if { ([string compare $target "zc706"] == 0)} {
