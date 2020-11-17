@@ -23,9 +23,9 @@ if { [string compare $target "zc706"] == 0 } {
 } elseif { [string compare $target "zc702"] == 0 } {
     set_property "board_part" "xilinx.com:zc702:part0:1.4" $obj
 } elseif { [string compare $target "zcu102"] == 0 } {
-    set_property "board_part" "xilinx.com:zcu102:part0:3.2" $obj
+    set_property "board_part" "xilinx.com:zcu102:part0:3.3" $obj
 } elseif { [string compare $target "zcu106"] == 0 } {
-    set_property "board_part" "xilinx.com:zcu106:part0:2.2" $obj
+    set_property "board_part" "xilinx.com:zcu106:part0:2.3" $obj
 }
 
 set_property "default_lib" "xil_defaultlib" $obj
@@ -45,7 +45,7 @@ if { [string compare $target "zc706"] == 0 } {
     apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 -config {make_external "FIXED_IO, DDR" apply_board_preset "1" Master "Disable" Slave "Disable" }  [get_bd_cells processing_system7_0]
     connect_bd_net [get_bd_pins processing_system7_0/FCLK_CLK0] [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK]
 } elseif { ([string compare $target "zcu102"] == 0) || ([string compare $target "zcu106"] == 0 )} {
-    create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.2 zynq_ultra_ps_e_0
+    create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.3 zynq_ultra_ps_e_0
     apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1" }  [get_bd_cells zynq_ultra_ps_e_0]
     set_property -dict [list CONFIG.PSU__USE__M_AXI_GP0 {0} CONFIG.PSU__USE__M_AXI_GP1 {0}] [get_bd_cells zynq_ultra_ps_e_0]
     set_property -dict [list CONFIG.PSU__FPGA_PL0_ENABLE {0} CONFIG.PSU__USE__IRQ0 {0}] [get_bd_cells zynq_ultra_ps_e_0]

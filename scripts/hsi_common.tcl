@@ -13,6 +13,6 @@ if { [string compare $target "zc706"] == 0 } {
     exit
 }
 
-open_hw_design system_wrapper.hdf
-set_repo_path $devtree
+hsi open_hw_design system_wrapper.hdf
+hsi set_repo_path $devtree
 

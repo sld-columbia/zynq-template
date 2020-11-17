@@ -2,10 +2,10 @@
 # Target Board
 board_list = zc702 zc706 zcu102 zcu106
 
-BOARD ?= zc702
+#BOARD ?= zc702
 #BOARD ?= zc706
 #BOARD ?= zcu102
-#BOARD ?= zcu106
+BOARD ?= zcu106
 
 ETHADDR ?=
 
@@ -14,8 +14,8 @@ ifeq ("$(XILINX_VIVADO)","")
 $(error XILINX_VIVADO path not specified)
 endif
 
-ifeq ($(findstring 2018.2, $(XILINX_VIVADO)),)
-$(error Vivado version must be 2018.2)
+ifeq ($(findstring 2019.2, $(XILINX_VIVADO)),)
+$(error Vivado version must be 2019.2)
 endif
 
 ifeq ($(filter $(BOARD),$(board_list)),)
@@ -286,30 +286,33 @@ clean-vivado:
 
 
 # SKD
-$(SDK_BUILD)/system_wrapper.hdf: $(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.sysdef
+$(SDK_BUILD)/system_wrapper.hdf: $(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.hwdef
 	@mkdir -p $(SDK_BUILD)
 	@cp $< $@
 
 $(SDK_BUILD)/dt/system-top.dts:  $(SDK_BUILD)/system_wrapper.hdf
 	@echo "=== $(BOARD): generating device tree ==="
 	@cd $(SDK_BUILD); \
-	hsi -mode batch -quiet -notrace -source $(SCRIPTS)/hsi_dt.tcl -tclargs $(BOARD) $(ZYNQ_ROOT) | tee $(SDK_BUILD)/$(BOARD).log;
+	xsct -quiet $(SCRIPTS)/hsi_dt.tcl $(BOARD) $(ZYNQ_ROOT) | tee $(SDK_BUILD)/$(BOARD).log;
 
-$(SDK_BUILD)/dt/system.dtb: $(SDK_BUILD)/dt/system-top.dts
+$(SDK_BUILD)/dt/system.dts.tmp: $(SDK_BUILD)/dt/system-top.dts
+	$(QUIET_BUILD) gcc -I $(SDK_BUILD)/include -E -nostdinc -undef -D__DTS__ -x assembler-with-cpp -o $@ $<
+
+$(SDK_BUILD)/dt/system.dtb: $(SDK_BUILD)/dt/system.dts.tmp
 	@echo "=== $(BOARD): compiling device tree ==="
 	@dtc -I dts -O dtb -o $@ $<
 
 $(SDK_BUILD)/fsbl/executable.elf: $(SDK_BUILD)/system_wrapper.hdf $(SDK_BUILD)/dt/system-top.dts
 	@echo "=== $(BOARD): generating first stage boot loader ==="
 	@cd $(SDK_BUILD); \
-	hsi -mode batch -quiet -notrace -source $(SCRIPTS)/hsi_fsbl.tcl -tclargs $(BOARD) $(ZYNQ_ROOT) | tee $(SDK_BUILD)/$(BOARD).log;
+	xsct -quiet $(SCRIPTS)/hsi_fsbl.tcl $(BOARD) $(ZYNQ_ROOT) | tee $(SDK_BUILD)/$(BOARD).log;
 
 ifneq ($(findstring zcu, $(BOARD)),)
 
 $(SDK_BUILD)/pmufw/executable.elf:  $(SDK_BUILD)/system_wrapper.hdf $(SDK_BUILD)/dt/system-top.dts
 	@echo "=== $(BOARD): generating PMU firmware ==="
 	@cd $(SDK_BUILD); \
-	hsi -mode batch -quiet -notrace -source $(SCRIPTS)/hsi_pmufw.tcl -tclargs $(BOARD) $(ZYNQ_ROOT) | tee $(SDK_BUILD)/$(BOARD).log;
+	xsct -quiet $(SCRIPTS)/hsi_pmufw.tcl $(BOARD) $(ZYNQ_ROOT) | tee $(SDK_BUILD)/$(BOARD).log;
 
 arm-trusted-firmware/build/zynqmp/release/bl31/bl31.elf:
 	@echo "=== $(BOARD): compiling ARM trusted firmware ==="
