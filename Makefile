@@ -275,9 +275,9 @@ $(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.bit:
 	fi; \
 
 
-$(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.sysdef: $(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.bit
+$(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.hwdef: $(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.bit
 
-vivado: $(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.sysdef
+vivado: $(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.hwdef
 
 clean-vivado:
 	rm -rf $(VIVADO_BUILD)
