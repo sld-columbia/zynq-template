@@ -7,7 +7,10 @@ board_list = zc702 zc706 zcu102 zcu106
 #BOARD ?= zcu102
 BOARD ?= zcu106
 
+DESIGN ?= $(BOARD)
+
 ETHADDR ?=
+
 
 # Environment checks
 ifeq ("$(XILINX_VIVADO)","")
@@ -23,20 +26,23 @@ $(error Supported boards are $(board_list))
 endif
 
 # Configuration
-ZYNQ_ROOT=$(PWD)
-SCRIPTS=$(ZYNQ_ROOT)/scripts
-OUT=$(ZYNQ_ROOT)/out
-IMAGES=$(OUT)/$(BOARD)/images
-SD-CARD=$(OUT)/$(BOARD)/sd-card
-LINUX_BUILD=$(OUT)/$(BOARD)/linux
-UBOOT_BUILD=$(OUT)/$(BOARD)/u-boot
-VIVADO_BUILD=$(OUT)/$(BOARD)/vivado
-SDK_BUILD=$(OUT)/$(BOARD)/sdk
+TOP          ?= system_wrapper
+ZYNQ_ROOT    ?= $(PWD)
+SCRIPTS       = $(ZYNQ_ROOT)/scripts
+OUT          ?= $(ZYNQ_ROOT)/out
+IMAGES        = $(OUT)/$(BOARD)/images
+SD-CARD       = $(OUT)/$(BOARD)/sd-card
+LINUX_BUILD   = $(OUT)/$(BOARD)/linux
+UBOOT_BUILD   = $(OUT)/$(BOARD)/u-boot
+VIVADO_BUILD ?= $(OUT)/$(BOARD)/vivado
+SDK_BUILD     = $(OUT)/$(BOARD)/sdk
+
 
 # ZYNQ 7-series
 ifneq ($(findstring zc7, $(BOARD)),)
 ARCH=arm
 UBOOT_ARCH=arm
+BOOTGEN_ARCH=zynq
 CROSS_COMPILE=arm-linux-gnueabihf-
 UBOOT_DEFCONFIG=zynq_$(BOARD)_config
 LINUX_DEFCONFIG=xilinx_zynq_defconfig
@@ -60,6 +66,7 @@ endif
 ifneq ($(findstring zcu, $(BOARD)),)
 ARCH=arm64
 UBOOT_ARCH=arm
+BOOTGEN_ARCH=zynqmp
 CROSS_COMPILE=aarch64-linux-gnu-
 UBOOT_DEFCONFIG=xilinx_zynqmp_$(BOARD)_$(REVISION)_config
 LINUX_DEFCONFIG=xilinx_zynqmp_defconfig
@@ -125,9 +132,15 @@ $(IMAGES)/$(LINUX_IMAGE): $(LINUX_BUILD)/arch/$(ARCH)/boot/$(LINUX_IMAGE)
 	@mkdir -p $(IMAGES)
 	@cp $< $@
 
-$(IMAGES)/system_wrapper.bit: $(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.bit
+$(IMAGES)/$(TOP).bit: $(VIVADO_BUILD)/$(DESIGN).runs/impl_1/$(TOP).bit
 	@mkdir -p $(IMAGES)
 	@cp $< $@
+
+$(IMAGES)/bit2bin.bif:
+	@echo "all: { $(IMAGES)/$(TOP).bit }" > $@
+
+$(IMAGES)/$(TOP).bit.bin: $(IMAGES)/bit2bin.bif $(IMAGES)/$(TOP).bit
+	bootgen -image $< -arch $(BOOTGEN_ARCH) -process_bitstream bin
 
 $(IMAGES)/system.dtb: $(SDK_BUILD)/dt/system.dtb
 	@mkdir -p $(IMAGES)
@@ -142,7 +155,7 @@ $(IMAGES)/pmufw.elf: $(SDK_BUILD)/pmufw/executable.elf
 	@mkdir -p $(IMAGES)
 	@cp $< $@
 
-$(IMAGES)/bl31.elf: arm-trusted-firmware/build/zynqmp/release/bl31/bl31.elf
+$(IMAGES)/bl31.elf: $(ZYNQ_ROOT)/arm-trusted-firmware/build/zynqmp/release/bl31/bl31.elf
 	@mkdir -p $(IMAGES)
 	@cp $< $@
 
@@ -151,7 +164,6 @@ $(IMAGES)/BOOT.bin: 			\
 	$(SCRIPTS)/zynqmp.bif		\
 	$(IMAGES)/fsbl.elf		\
 	$(IMAGES)/pmufw.elf		\
-	$(IMAGES)/system_wrapper.bit 	\
 	$(IMAGES)/bl31.elf		\
 	$(IMAGES)/u-boot.elf
 	@echo "=== $(BOARD): generating bootstrap ==="
@@ -163,7 +175,6 @@ else
 $(IMAGES)/BOOT.bin: 			\
 	$(SCRIPTS)/zynq.bif		\
 	$(IMAGES)/fsbl.elf		\
-	$(IMAGES)/system_wrapper.bit 	\
 	$(IMAGES)/u-boot.elf
 	@echo "=== $(BOARD): generating bootstrap ==="
 	@cd $(IMAGES); \
@@ -198,6 +209,10 @@ $(SD-CARD)/root: $(IMAGES)/$(ROOTFS_NAME)_rootfs.tar
 	@cd $(SD-CARD); tar xf $<; touch $@
 
 $(SD-CARD)/boot/BOOT.bin: $(IMAGES)/BOOT.bin
+	@mkdir -p $(SD-CARD)/boot
+	@cp $< $@
+
+$(SD-CARD)/boot/bitstream.bin: $(IMAGES)/$(TOP).bit.bin
 	@mkdir -p $(SD-CARD)/boot
 	@cp $< $@
 
@@ -238,6 +253,7 @@ endif
 
 sd-card:				\
 	$(SD-CARD)/boot/BOOT.bin 	\
+	$(SD-CARD)/boot/bitstream.bin 	\
 	$(SD-CARD)/boot/$(LINUX_IMAGE) 	\
 	$(SD-CARD)/boot/$(DEVTREE)	\
 	$(SD-CARD)/boot/uEnv.txt	\
@@ -251,7 +267,7 @@ clean-sd-card:
 
 
 # Vivado
-$(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.bit:
+$(VIVADO_BUILD)/$(DESIGN).runs/impl_1/$(TOP).bit:
 	@echo "=== $(BOARD): generating bitstream ==="
 	@mkdir -p $(VIVADO_BUILD)
 	@cd $(VIVADO_BUILD); \
@@ -275,9 +291,9 @@ $(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.bit:
 	fi; \
 
 
-$(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.hwdef: $(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.bit
+$(VIVADO_BUILD)/$(DESIGN).runs/impl_1/$(TOP).hwdef: $(VIVADO_BUILD)/$(DESIGN).runs/impl_1/$(TOP).bit
 
-vivado: $(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.hwdef
+vivado: $(VIVADO_BUILD)/$(DESIGN).runs/impl_1/$(TOP).hwdef
 
 clean-vivado:
 	rm -rf $(VIVADO_BUILD)
@@ -286,14 +302,14 @@ clean-vivado:
 
 
 # SKD
-$(SDK_BUILD)/system_wrapper.hdf: $(VIVADO_BUILD)/$(BOARD).runs/impl_1/system_wrapper.hwdef
+$(SDK_BUILD)/$(TOP).hdf: $(VIVADO_BUILD)/$(DESIGN).runs/impl_1/$(TOP).hwdef
 	@mkdir -p $(SDK_BUILD)
 	@cp $< $@
 
-$(SDK_BUILD)/dt/system-top.dts:  $(SDK_BUILD)/system_wrapper.hdf
+$(SDK_BUILD)/dt/system-top.dts:  $(SDK_BUILD)/$(TOP).hdf
 	@echo "=== $(BOARD): generating device tree ==="
 	@cd $(SDK_BUILD); \
-	xsct -quiet $(SCRIPTS)/hsi_dt.tcl $(BOARD) $(ZYNQ_ROOT) | tee $(SDK_BUILD)/$(BOARD).log;
+	xsct -quiet $(SCRIPTS)/hsi_dt.tcl $(BOARD) $(ZYNQ_ROOT) $(TOP) | tee $(SDK_BUILD)/$(BOARD).log;
 
 $(SDK_BUILD)/dt/system.dts.tmp: $(SDK_BUILD)/dt/system-top.dts
 	$(QUIET_BUILD) gcc -I $(SDK_BUILD)/include -E -nostdinc -undef -D__DTS__ -x assembler-with-cpp -o $@ $<
@@ -302,24 +318,24 @@ $(SDK_BUILD)/dt/system.dtb: $(SDK_BUILD)/dt/system.dts.tmp
 	@echo "=== $(BOARD): compiling device tree ==="
 	@dtc -I dts -O dtb -o $@ $<
 
-$(SDK_BUILD)/fsbl/executable.elf: $(SDK_BUILD)/system_wrapper.hdf $(SDK_BUILD)/dt/system-top.dts
+$(SDK_BUILD)/fsbl/executable.elf: $(SDK_BUILD)/$(TOP).hdf $(SDK_BUILD)/dt/system-top.dts
 	@echo "=== $(BOARD): generating first stage boot loader ==="
 	@cd $(SDK_BUILD); \
-	xsct -quiet $(SCRIPTS)/hsi_fsbl.tcl $(BOARD) $(ZYNQ_ROOT) | tee $(SDK_BUILD)/$(BOARD).log;
+	xsct -quiet $(SCRIPTS)/hsi_fsbl.tcl $(BOARD) $(ZYNQ_ROOT) $(TOP) | tee $(SDK_BUILD)/$(BOARD).log;
 
 ifneq ($(findstring zcu, $(BOARD)),)
 
-$(SDK_BUILD)/pmufw/executable.elf:  $(SDK_BUILD)/system_wrapper.hdf $(SDK_BUILD)/dt/system-top.dts
+$(SDK_BUILD)/pmufw/executable.elf:  $(SDK_BUILD)/$(TOP).hdf $(SDK_BUILD)/dt/system-top.dts
 	@echo "=== $(BOARD): generating PMU firmware ==="
 	@cd $(SDK_BUILD); \
-	xsct -quiet $(SCRIPTS)/hsi_pmufw.tcl $(BOARD) $(ZYNQ_ROOT) | tee $(SDK_BUILD)/$(BOARD).log;
+	xsct -quiet $(SCRIPTS)/hsi_pmufw.tcl $(BOARD) $(ZYNQ_ROOT) $(TOP) | tee $(SDK_BUILD)/$(BOARD).log;
 
-arm-trusted-firmware/build/zynqmp/release/bl31/bl31.elf:
+$(ZYNQ_ROOT)/arm-trusted-firmware/build/zynqmp/release/bl31/bl31.elf:
 	@echo "=== $(BOARD): compiling ARM trusted firmware ==="
-	@ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) make PLAT=zynqmp RESET_TO_BL31=1 -C arm-trusted-firmware
+	@ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) make PLAT=zynqmp RESET_TO_BL31=1 -C $(ZYNQ_ROOT)/arm-trusted-firmware
 
 clean-atf:
-	@make PLAT=zynqmp RESET_TO_BL31=1 -C arm-trusted-firmware distclean
+	@make PLAT=zynqmp RESET_TO_BL31=1 -C $(ZYNQ_ROOT)/arm-trusted-firmware distclean
 
 .PHONY: clean-atf
 
@@ -327,7 +343,7 @@ sdk: 						\
 	$(SDK_BUILD)/dt/system.dtb		\
 	$(SDK_BUILD)/fsbl/executable.elf	\
 	$(SDK_BUILD)/pmufw/executable.elf	\
-	arm-trusted-firmware/bl31.elf
+	$(ZYNQ_ROOT)/arm-trusted-firmware/build/zynqmp/release/bl31/bl31.elf
 
 clean-sdk: clean-atf
 	rm -rf $(SDK_BUILD)

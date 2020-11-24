@@ -1,7 +1,4 @@
-set target [lindex $argv 0]
 set zynq_root [lindex $argv 1]
-set devtree $zynq_root/device-tree-xlnx
-
 source $zynq_root/scripts/hsi_common.tcl
 
 if { ([string compare $target "zc706"] == 0) || ([string compare $target "zc702"] == 0 )} {

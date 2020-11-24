@@ -1,3 +1,6 @@
+set target [lindex $argv 0]
+set design [lindex $argv 2]
+set devtree $zynq_root/device-tree-xlnx
 
 # Generate the device tree and boot loader through SDK
 if { [string compare $target "zc706"] == 0 } {
@@ -13,6 +16,6 @@ if { [string compare $target "zc706"] == 0 } {
     exit
 }
 
-hsi open_hw_design system_wrapper.hdf
+hsi open_hw_design $design.hdf
 hsi set_repo_path $devtree
 
