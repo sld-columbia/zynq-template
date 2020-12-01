@@ -1,0 +1,2 @@
+bootargs=console=ttyPS0,115200 earlycon clk_ignore_unused root=/dev/mmcblk0p2 rw rootwait earlyprintk cma=256 uio_pdrv_genirq.of_id=generic-uio
+uenvcmd=echo Copying Linux from SD to RAM... && fatload mmc 0 0x2080000 uImage && fatload mmc 0 0x2000000 devicetree.dtb && bootm 0x2080000 - 0x2000000
