@@ -184,7 +184,7 @@ endif
 $(IMAGES)/$(ROOTFS_NAME)_rootfs.tar:
 	@echo "=== $(BOARD): downloading template rootfs ==="
 	@mkdir -p $(IMAGES)
-	@wget http://espdev.cs.columbia.edu/zynq/$(ROOTFS_NAME)_rootfs_v2019.2.tar -O $@
+	@wget http://espdev.cs.columbia.edu/zynq/$(ROOTFS_NAME)_rootfs.tar -O $@
 
 images:						\
 	$(IMAGES)/BOOT.bin 			\
